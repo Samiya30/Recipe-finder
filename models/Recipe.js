@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
 
 const recipeSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     name: { type: String, required: true },
-    ingredients: { type: [String], required: true },
+    ingredients: { type: String, required: true },
     instructions: { type: String, required: true },
-    image: { type: String, default: 'https://cdn-icons-png.flaticon.com/512/3075/3075977.png' }
+    image: { type: String }
 });
 
 module.exports = mongoose.model('Recipe', recipeSchema);
