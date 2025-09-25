@@ -1,21 +1,26 @@
 const jwt = require('jsonwebtoken');
-const users = []; 
-const SECRET_KEY = "mysecretkey";
+const User = require('../models/User');
+const SECRET_KEY = 'mysecretkey';
 
-exports.register = (req, res) => {
+// Register
+exports.register = async (req, res) => {
     const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ message: 'All fields required' });
 
-    const userExists = users.find(u => u.username === username);
-    if (userExists) return res.json({ message: 'User already exists' });
+    const exists = await User.findOne({ username });
+    if (exists) return res.status(400).json({ message: 'User already exists' });
 
-    users.push({ username, password });
+    const user = new User({ username, password });
+    await user.save();
     res.json({ message: 'User registered successfully' });
 };
 
-exports.login = (req, res) => {
+// Login
+exports.login = async (req, res) => {
     const { username, password } = req.body;
-    const user = users.find(u => u.username === username && u.password === password);
-    if (!user) return res.json({ message: 'Invalid credentials' });
-    const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: '1h' });
+    const user = await User.findOne({ username, password });
+    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+
+    const token = jwt.sign({ id: user._id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
     res.json({ token });
 };
